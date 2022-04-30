@@ -17,9 +17,9 @@ db_session.global_init("db/users.db")
 
 
 @app.route('/donate', methods=['GET', 'POST'])
-def donate():
+def donate(): # страница доната
     form = DonateForm()
-    if form.validate_on_submit():
+    if form.validate_on_submit(): # API платёжной системы
         num = int(request.form['summ'])
         api = Api(merchant_id=1396424,
                   secret_key='test')
@@ -36,7 +36,7 @@ def donate():
 
 
 @app.route('/toplist')
-def toplist():
+def toplist(): # страница с 10-ми людьми с наибольшим кол-вом коинов
     db_sess = db_session.create_session()
     users = db_sess.query(User).order_by(desc(User.coins))
     count = 0
@@ -60,7 +60,7 @@ def logout():
 
 @app.route('/pass_val', methods=['OPTIONS'])
 @login_required
-def pass_val():
+def pass_val(): # страница принятие данных от JS с помощью ajax и их запись в БД
     string = request.args.get('value')
     id = string.split(',')[0]
     db_sess = db_session.create_session()
@@ -84,7 +84,7 @@ def load_user(user_id):
 
 @app.route('/click/<int:id>', methods=['GET', 'POST'])
 @login_required
-def click(id):
+def click(id): # страница главного кликера
     if current_user.is_authenticated and request.method == "GET":
         db_sess = db_session.create_session()
         user = db_sess.query(User).filter(
@@ -104,10 +104,10 @@ def click(id):
 
 
 @app.route('/reg', methods=['GET', 'POST'])
-def reg():
+def reg(): # страница регистрации
     form = RegForm()
     db_sess = db_session.create_session()
-    if form.validate_on_submit():
+    if form.validate_on_submit(): # проверка нажатия кнопки в html
         if len(request.form['password']) < 8:
             return render_template("Регистрация.html", form=form, message='Длинна пароля меньше 8 символов')
         if request.form['password'] != request.form['repeatpassword']:
@@ -117,10 +117,10 @@ def reg():
                 continue
             else:
                 return render_template("Регистрация.html", form=form, message='Такая эл.почта уже зарегистрирована')
-        user = User()
+        user = User() # отправка в БД
         user.name = request.form['username']
         user.email = request.form['email']
-        user.set_password(request.form['password'])
+        user.set_password(request.form['password']) 
         user.coins = 0
         user.one_click = 1
         user.one_sec = 0
@@ -135,7 +135,7 @@ def reg():
 
 
 @app.route('/login', methods=['GET', 'POST'])
-def login():
+def login(): # страница входа
     form = LoginForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
@@ -148,8 +148,8 @@ def login():
 
 
 @app.route('/main', methods=['GET', 'POST'])
-def main():
-    response = requests.get('https://api.chucknorris.io/jokes/random').json()
+def main():  # страница главная
+    response = requests.get('https://api.chucknorris.io/jokes/random').json()  # получение json с API Чака Норисса
     chuck_norris_joke = str(response['value'])
     return render_template("Главная.html", joke=chuck_norris_joke)
 
